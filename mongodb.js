@@ -22,7 +22,7 @@ mongoClient.connect(
       {
         _id: id,
         name: 'Sunny',
-        age: 26,
+        age: 26
       },
       (error, result) => {
         if (error) {
@@ -36,11 +36,11 @@ mongoClient.connect(
       [
         {
           name: 'Sunny',
-          age: 26,
+          age: 26
         },
         {
           name: 'Prachi',
-          age: 27,
+          age: 27
         },
       ],
       (error, result) => {
@@ -52,25 +52,28 @@ mongoClient.connect(
     );
 
     // Adding to the tasks collection.
-    db.collection('tasks').insertMany([
-      {
-        description: 'small',
-        completed: false,
-      },
-      {
-        description: 'large',
-        completed: true,
-      },
-      {
-        description: 'X large',
-        completed: true,
+    db.collection('tasks').insertMany(
+      [
+        {
+          description: 'small',
+          completed: false
+        },
+        {
+          description: 'large',
+          completed: true
+        },
+        {
+          description: 'X large',
+          completed: true
+        },
+      ],
+      (error, result) => {
+        if (error) {
+          return console.log('uanble to connect');
+        }
+        console.log(result.ops);
       }
-    ],(error, result) => {
-      if(error) {
-        return console.log('uanble to connect');
-      }
-      console.log(result.ops);
-    });
+    );
 
     // Find One Document from users collection
     db.collection('users').findOne({ name: 'Prachi' }, (error, user) => {
@@ -117,7 +120,7 @@ mongoClient.connect(
           $set: {
             name: 'Prachi',
             age: 23
-          }
+          },
         }
       )
       .then((result) => console.log(result))
@@ -126,11 +129,11 @@ mongoClient.connect(
     // Updating age with $inc operator
     db.collection('users')
       .updateOne(
-        { name: 'Prachi'},
+        { name: 'Prachi' }
         {
           $inc: {
             age: 1
-          }
+          },
         }
       )
       .then((result) => console.log(result))
@@ -139,10 +142,10 @@ mongoClient.connect(
     // Update all the incompleted documents.
     db.collection('tasks')
       .updateMany(
-        { completed: true },
+        { completed: true }
         {
           $set: {
-            completed: false
+            completed: false,
           }
         }
       )
@@ -152,7 +155,7 @@ mongoClient.connect(
     // Delete the documents
     db.collection('users')
       .deleteMany({
-        age: 26,
+        age: 26
       })
       .then((result) => console.log(result))
       .catch((error) => console.log(error));
