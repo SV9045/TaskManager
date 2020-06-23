@@ -1,6 +1,8 @@
 const express = require('express');
 const User = require('../models/user-model');
 const auth = require('../middleware/auth-middleware');
+const sharp = require('sharp');
+const multer = require('multer');
 const router = new express.Router();
 
 // Posting on users end-point
@@ -57,15 +59,15 @@ router.post('/users/logout', auth, async (req, res) => {
 });
 
 // Logout from all sessions
-router.post('/users/logoutAll', auth, async(req,res) => {
-  try{
-    req.user.tokens= [];
+router.post('/users/logoutAll', auth, async (req, res) => {
+  try {
+    req.user.tokens = [];
     await req.user.save();
     res.send();
-  } catch(error) {
+  } catch (error) {
     res.status(500).send();
   }
-})
+});
 // Getting from users end-point
 // router.get('/users', (req, res) => {
 //   User.find({})
@@ -140,5 +142,52 @@ router.delete('/users/me', auth, async (req, res) => {
     res.status(500).send(error);
   }
 });
+
+const upload = multer({
+  limits: { 
+    fileSize: 1000000 
+  },
+  fileFilter(req, file, callback) {
+    if (!file.originalname.endsWith('.jpg') &&
+      !file.originalname.endsWith('.jpeg') &&
+      !file.originalname.endsWith('.png')) {
+      return callback(
+        new Error('File must be with .jpg, .jpeg, .png extension')
+      );
+    }
+    callback(undefined, true);
+  }
+});
+
+// Upload the avatar
+router.post('/users/me/avatar', auth, upload.single('avatar'), async(req, res) => {
+  const buffer = await sharp(req.file.buffer).resize({ width: 250, height: 250}).png().toBuffer();
+  req.user.avatar = buffer;
+  await req.user.save();
+  res.send();
+}, (error, req, res, next) => {
+  res.status(400).send({error: error.message});
+});
+
+// delete the avatar
+router.delete('/users/me/avatar', auth, async(req, res) => {
+  req.user.avatar = undefined;
+  await req.user.save();
+  res.send();
+});
+
+// Get the avatar
+router.get('/users/:id/avatar', async(req,res) => {
+  try{
+    const user = await User.findById(req.params.id);
+    if(!user || !user.avatar) {
+      throw new Error();
+    }
+    res.sent('Content-Type', 'image/png');
+    res.send(user.avatar);
+  } catch {
+    res.status(400).send();
+  }
+})
 
 module.exports = router;
